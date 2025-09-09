@@ -30,7 +30,7 @@ display(y.head())
 from sklearn.model_selection import train_test_split
 
 # Split the data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=8)
 
 # Print the shapes of the resulting sets
 print("Shape of X_train:", X_train.shape)
@@ -85,3 +85,9 @@ print(f"R-squared (R2): {r2:.2f}")
 results_df = pd.DataFrame({'Actual Price': y_test, 'Predicted Price': y_pred})
 display(results_df.head(20))
 
+import pickle
+from sklearn.ensemble import RandomForestRegressor
+# Assuming 'model' is your trained RandomForestRegressor object
+# This code will create a file named 'model.pkl' in the current directory
+with open('model.pkl', 'wb') as file:
+    pickle.dump(model, file)
