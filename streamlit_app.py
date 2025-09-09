@@ -58,7 +58,7 @@ from sklearn.ensemble import RandomForestRegressor
 # This code will create a file named 'model.pkl' in the current directory
 with open('model.pkl', 'wb') as file:
     pickle.dump(model, file)
-    with open('models.pkl', 'rb') as f:
+with open('models.pkl', 'rb') as f:
     model = pickle.load(f)
 
 # Load the dataframe (assuming the cleaned dataframe is needed for feature extraction)
