@@ -60,7 +60,6 @@ url = f'https://drive.google.com/file/d/1POVnnp6fBP97E-bCev1s-BnPqMENGzv8/view?u
 
 df_original = pd.read_csv(url, encoding='latin-1')
 
-https://drive.google.com/file/d/1POVnnp6fBP97E-bCev1s-BnPqMENGzv8/view?usp=drive_link
 # Set the title of the web application
 st.title('Laptop Price Prediction')
 
