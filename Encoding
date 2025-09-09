@@ -1,0 +1,418 @@
+from sklearn.preprocessing import LabelEncoder
+
+# Initialize the LabelEncoder
+label_encoder = LabelEncoder()
+
+# Apply label encoding to the 'Company' column
+df['Company_Encoded'] = label_encoder.fit_transform(df['Company'])
+
+# Display the mapping between original Company names and encoded values
+label_mapping = dict(zip(label_encoder.classes_, label_encoder.transform(label_encoder.classes_)))
+print("Label Encoding Table for 'Company':")
+print(label_mapping)
+
+# Display the entire DataFrame with the new encoded column
+display(df.head())
+
+# Drop the original 'Company' column as it's no longer needed after encoding
+df = df.drop('Company', axis=1)
+
+# Display the first few rows to confirm the column has been dropped
+display(df.head())
+
+from sklearn.preprocessing import LabelEncoder
+
+# Initialize the LabelEncoder
+label_encoder_product = LabelEncoder()
+
+# Apply label encoding to the 'Product' column
+df['Product_Encoded'] = label_encoder_product.fit_transform(df['Product'])
+
+# Display the mapping between original Product names and encoded values
+label_mapping_product = dict(zip(label_encoder_product.classes_, label_encoder_product.transform(label_encoder_product.classes_)))
+print("Label Encoding Table for 'Product':")
+# Print only a subset of the mapping if it's too large
+if len(label_mapping_product) > 20:
+    print({k: label_mapping_product[k] for i, k in enumerate(label_mapping_product) if i < 20}, '...')
+else:
+    print(label_mapping_product)
+
+# Display the first few rows with the new encoded column
+display(df.head())
+
+# Drop the original 'Product' column
+df = df.drop('Product', axis=1)
+
+# Display the first few rows to confirm the column has been dropped
+display(df.head())
+
+from sklearn.preprocessing import LabelEncoder
+
+# Initialize the LabelEncoder
+label_encoder_typename = LabelEncoder()
+
+# Apply label encoding to the 'TypeName' column
+df['TypeName_Encoded'] = label_encoder_typename.fit_transform(df['TypeName'])
+
+# Display the mapping between original TypeName names and encoded values
+label_mapping_typename = dict(zip(label_encoder_typename.classes_, label_encoder_typename.transform(label_encoder_typename.classes_)))
+print("Label Encoding Table for 'TypeName':")
+print(label_mapping_typename)
+
+# Display the first few rows with the new encoded column
+display(df.head())
+
+# Drop the original 'TypeName' column
+df = df.drop('TypeName', axis=1)
+
+# Display the first few rows to confirm the column has been dropped
+display(df.head())
+
+import re
+
+def extract_dimensions(resolution_str):
+    """Extracts screen dimensions from a resolution string."""
+    # Use regex to find the pattern of digits followed by 'x' and more digits
+    match = re.search(r'(\d+x\d+)', resolution_str)
+    # If a match is found, return the matched string (e.g., '1920x1080')
+    if match:
+        return match.group(1)
+    # If no match is found, return None
+    return None
+
+# Apply the extract_dimensions function to the 'ScreenResolution' column
+# and create a new column 'Screen_Dimensions' with the extracted values
+df['Screen_Dimensions'] = df['ScreenResolution'].apply(extract_dimensions)
+
+# Display the first few rows of the DataFrame to show the new column
+display(df.head())
+
+import re # Import the regular expression module
+
+def extract_screen_type(resolution_str):
+    """Extracts screen types from a resolution string."""
+    types = [] # Initialize an empty list to store the screen types found
+    # Check if 'IPS Panel' is in the resolution string and add it to the list if present
+    if 'IPS Panel' in resolution_str:
+        types.append('IPS Panel')
+    # Check if 'Full HD' is in the resolution string and add it to the list if present
+    if 'Full HD' in resolution_str:
+        types.append('Full HD')
+    # Check if 'Retina Display' is in the resolution string and add it to the list if present
+    if 'Retina Display' in resolution_str:
+        types.append('Retina Display')
+    # Check if 'Touchscreen' is in the resolution string and add it to the list if present
+    if 'Touchscreen' in resolution_str:
+        types.append('Touchscreen')
+    # Join the found types with a comma and space, or return 'Other' if no types were found
+    return ', '.join(types) if types else 'Other'
+
+# Apply the extract_screen_type function to the 'ScreenResolution' column
+# and create a new column 'Screen_Type' with the extracted screen types
+df['Screen_Type'] = df['ScreenResolution'].apply(extract_screen_type)
+
+# Display the first few rows of the DataFrame to show the new 'Screen_Type' column
+display(df.head())
+
+from sklearn.preprocessing import LabelEncoder # Import the LabelEncoder class from scikit-learn
+
+# Initialize the LabelEncoder
+label_encoder_screentype = LabelEncoder() # Create an instance of LabelEncoder
+
+# Apply label encoding to the 'Screen_Type' column
+# .fit_transform() fits the encoder to the unique values in 'Screen_Type' and then transforms the column
+df['Screen_Type_Encoded'] = label_encoder_screentype.fit_transform(df['Screen_Type'])
+
+# Display the mapping between original Screen Type names and encoded values
+# .classes_ gives the unique original labels, .transform() converts them to encoded values
+label_mapping_screentype = dict(zip(label_encoder_screentype.classes_, label_encoder_screentype.transform(label_encoder_screentype.classes_)))
+print("Label Encoding Table for 'Screen_Type':") # Print a header for the mapping table
+print(label_mapping_screentype) # Print the dictionary showing the mapping
+
+
+# Display the first few rows with the new encoded column
+display(df.head()) # Show the first 5 rows of the DataFrame including the new 'Screen_Type_Encoded' column
+
+# Drop the original 'ScreenResolution' column
+df = df.drop('ScreenResolution', axis=1)
+
+# Display the first few rows to confirm the column has been dropped
+display(df.head())
+
+# Display the first few rows of the DataFrame
+display(df.head())
+
+def extract_cpu_brand(cpu_string):
+    """Extracts the CPU brand (first word) from a CPU string."""
+    # Split the input string by spaces
+    parts = cpu_string.split()
+    # Return the first part, which is the CPU brand
+    return parts[0]
+
+# Apply the extract_cpu_brand function to the 'Cpu' column
+# This creates a new column 'CPU_Brand' with the extracted CPU brand for each row
+df['CPU_Brand'] = df['Cpu'].apply(extract_cpu_brand)
+
+# Display the first few rows of the DataFrame to show the new 'CPU_Brand' column
+display(df.head())
+
+import re # Import the regular expression module for pattern matching
+
+def extract_processing_level(cpu_string):
+    """Extracts the processing level from a CPU string."""
+    # Define a list of regex patterns to look for common CPU processing levels
+    patterns = [r'Core i[357]', r'Celeron', r'Pentium', r'AMD']
+    # Iterate through each pattern in the list
+    for pattern in patterns:
+        # Search for the current pattern within the input CPU string
+        match = re.search(pattern, cpu_string)
+        # If a match is found (i.e., the pattern exists in the string)
+        if match:
+            # Return the matched string (the processing level)
+            return match.group(0)
+    # If no matching pattern is found after checking all patterns, return 'Other'
+    return 'Other'
+
+# Apply the extract_processing_level function to each value in the 'Cpu' column
+# This creates a new column 'Processing_Level' with the extracted processing level for each row
+df['Processing_Level'] = df['Cpu'].apply(extract_processing_level)
+
+# Display the first few rows of the DataFrame to show the new 'Processing_Level' column
+display(df.head())
+
+def extract_cpu_details(cpu_string):
+    """Extracts CPU details (clock speed, model number) excluding brand and processing level."""
+    # Remove brand and processing level (assuming they are the first words)
+    parts = cpu_string.split()
+    # Join the remaining parts, skipping the brand and processing level
+    if len(parts) > 2:
+        # If there are more than two parts, join from the third part onwards
+        return ' '.join(parts[2:])
+    elif len(parts) > 1:
+        # If there are exactly two parts, join from the second part onwards
+        return ' '.join(parts[1:])
+    # If there is one or zero parts, return an empty string
+    return ''
+
+# Apply the extract_cpu_details function to each value in the 'Cpu' column
+# This creates a new column 'CPU_Details' with the extracted details for each row
+df['CPU_Details'] = df['Cpu'].apply(extract_cpu_details)
+
+# Display the first few rows of the DataFrame to show the new 'CPU_Details' column
+display(df.head())
+
+from sklearn.preprocessing import LabelEncoder
+
+# Initialize LabelEncoders for each new CPU column
+label_encoder_cpu_brand = LabelEncoder()
+label_encoder_processing_level = LabelEncoder()
+label_encoder_cpu_details = LabelEncoder()
+
+# Apply label encoding to the new columns
+df['CPU_Brand_Encoded'] = label_encoder_cpu_brand.fit_transform(df['CPU_Brand'])
+df['Processing_Level_Encoded'] = label_encoder_processing_level.fit_transform(df['Processing_Level'])
+df['CPU_Details_Encoded'] = label_encoder_cpu_details.fit_transform(df['CPU_Details'])
+
+# Display the first few rows with the new encoded columns
+display(df.head())
+
+# Drop the original 'Cpu' column
+df = df.drop('Cpu', axis=1)
+
+# Display the first few rows to confirm the column has been dropped
+display(df.head())
+
+# Display the first few rows of the DataFrame
+display(df.head())
+
+# Remove 'GB' from the 'Ram' column and convert to integer
+df['Ram'] = df['Ram'].str.replace('GB', '').astype(int)
+
+# Display the data types to confirm the change
+print(df.info())
+
+# Display the first few rows to show the updated column
+display(df.head())
+
+import re
+
+def extract_memory_value(memory_str):
+    """Extracts the numerical memory value from a memory string."""
+    # Use regex to find the pattern of digits followed by 'GB' or 'TB'
+    match = re.search(r'(\d+)(GB|TB)', memory_str)
+    # Check if a match was found
+    if match:
+        # Extract the numerical value (group 1) and convert it to an integer
+        value = int(match.group(1))
+        # Extract the unit (group 2)
+        unit = match.group(2)
+        # If the unit is 'TB', convert the value to GB
+        if unit == 'TB':
+            value *= 1024  # Convert TB to GB
+        # Return the extracted and potentially converted value
+        return value
+    # If no match is found, return 0
+    return 0  # Return 0 for unhandled cases or missing values
+
+# Apply the extract_memory_value function to the 'Memory' column
+# This creates a new column 'Memory_Value' with the extracted memory values for each row
+df['Memory_Value'] = df['Memory'].apply(extract_memory_value)
+
+# Display the first few rows of the DataFrame to show the new 'Memory_Value' column
+display(df.head())
+
+def extract_memory_type(memory_str):
+    """Extracts the memory type from a memory string."""
+    types = [] # Initialize an empty list to store memory types found
+    # Check if 'SSD' is in the memory string and add it to the list
+    if 'SSD' in memory_str:
+        types.append('SSD')
+    # Check if 'HDD' is in the memory string and add it to the list
+    if 'HDD' in memory_str:
+        types.append('HDD')
+    # Check if 'Flash Storage' is in the memory string and add it to the list
+    if 'Flash Storage' in memory_str:
+        types.append('Flash Storage')
+    # Check if 'Hybrid' is in the memory string and add it to the list
+    if 'Hybrid' in memory_str:
+        types.append('Hybrid')
+    # Join the found types with a comma and space, or return 'Other' if no types were found
+    return ', '.join(types) if types else 'Other'
+
+# Apply the extract_memory_type function to the 'Memory' column of the DataFrame
+df['Memory_Type'] = df['Memory'].apply(extract_memory_type)
+
+# Display the first few rows of the DataFrame to show the new 'Memory_Type' column
+display(df.head())
+
+from sklearn.preprocessing import LabelEncoder
+
+# Initialize the LabelEncoder
+label_encoder_memory_type = LabelEncoder()
+
+# Apply label encoding to the 'Memory_Type' column
+df['Memory_Type_Encoded'] = label_encoder_memory_type.fit_transform(df['Memory_Type'])
+
+# Display the mapping between original Memory Type names and encoded values
+label_mapping_memory_type = dict(zip(label_encoder_memory_type.classes_, label_encoder_memory_type.transform(label_encoder_memory_type.classes_)))
+print("Label Encoding Table for 'Memory_Type':")
+print(label_mapping_memory_type)
+
+
+# Display the first few rows with the new encoded column
+display(df.head())
+
+# Drop the original 'Memory' column
+df = df.drop('Memory', axis=1)
+
+# Display the first few rows to confirm the column has been dropped
+display(df.head())
+
+# Display the first few rows of the DataFrame
+display(df.head())
+
+def extract_gpu_company(gpu_string):
+    """Extracts the GPU company (first word) from a GPU string."""
+    # Split the GPU string by spaces
+    parts = gpu_string.split()
+    # Return the first element of the split string, which is the company name
+    return parts[0]
+
+# Apply the extract_gpu_company function to the 'Gpu' column
+# This creates a new column 'GPU_Company' with the extracted GPU company for each row
+df['GPU_Company'] = df['Gpu'].apply(extract_gpu_company)
+
+# Display the first few rows of the DataFrame to show the new 'GPU_Company' column
+display(df.head())
+
+def extract_gpu_type(gpu_string):
+    """Extracts the GPU type (parts after the first word) from a GPU string."""
+    # Split the input string by spaces
+    parts = gpu_string.split()
+    # Check if there is more than one part in the string
+    if len(parts) > 1:
+        # If there is more than one part, join all parts from the second part onwards
+        return ' '.join(parts[1:])
+    # If there is only one or zero parts, return an empty string
+    return ''
+
+# Apply the extract_gpu_type function to the 'Gpu' column
+# This creates a new column 'GPU_Type' with the extracted GPU type for each row
+df['GPU_Type'] = df['Gpu'].apply(extract_gpu_type)
+
+# Display the first few rows of the DataFrame to show the new 'GPU_Type' column
+display(df.head())
+
+def extract_gpu_details(gpu_string):
+    """Extracts the numerical or specific model details following the type from a GPU string."""
+    parts = gpu_string.split()
+    # Check if there are more than two parts (company and type)
+    if len(parts) > 2:
+        # Join the parts from the third part onwards
+        return ' '.join(parts[2:])
+    # If there are two or fewer parts, there are no further details to extract
+    return ''
+
+df['GPU_Details'] = df['Gpu'].apply(extract_gpu_details)
+
+display(df.head())
+
+from sklearn.preprocessing import LabelEncoder
+
+# Initialize LabelEncoders for GPU columns
+label_encoder_gpu_company = LabelEncoder()
+label_encoder_gpu_type = LabelEncoder()
+
+# Apply label encoding to the GPU columns
+df['GPU_Company_Encoded'] = label_encoder_gpu_company.fit_transform(df['GPU_Company'])
+df['GPU_Type_Encoded'] = label_encoder_gpu_type.fit_transform(df['GPU_Type'])
+
+# Display mapping for GPU Company
+label_mapping_gpu_company = dict(zip(label_encoder_gpu_company.classes_, label_encoder_gpu_company.transform(label_encoder_gpu_company.classes_)))
+print("Label Encoding Table for 'GPU_Company':")
+print(label_mapping_gpu_company)
+
+# Display mapping for GPU Type
+label_mapping_gpu_type = dict(zip(label_encoder_gpu_type.classes_, label_encoder_gpu_type.transform(label_encoder_gpu_type.classes_)))
+print("\nLabel Encoding Table for 'GPU_Type':")
+# Print only a subset of the mapping if it's too large
+if len(label_mapping_gpu_type) > 20:
+    print({k: label_mapping_gpu_type[k] for i, k in enumerate(label_mapping_gpu_type) if i < 20}, '...')
+else:
+    print(label_mapping_gpu_type)
+
+
+# Display the first few rows with the new encoded columns
+display(df.head())
+
+# Drop the original 'Gpu' column
+df = df.drop('Gpu', axis=1)
+
+# Display the first few rows to confirm the column has been dropped
+display(df.head())
+
+# Display the first few rows of the DataFrame
+display(df.head())
+
+from sklearn.preprocessing import LabelEncoder
+
+# Initialize the LabelEncoder
+label_encoder_opsys = LabelEncoder()
+
+# Apply label encoding to the 'OpSys' column
+df['OpSys_Encoded'] = label_encoder_opsys.fit_transform(df['OpSys'])
+
+# Display the mapping between original OpSys names and encoded values
+label_mapping_opsys = dict(zip(label_encoder_opsys.classes_, label_encoder_opsys.transform(label_encoder_opsys.classes_)))
+print("Label Encoding Table for 'OpSys':")
+print(label_mapping_opsys)
+
+# Display the first few rows with the new encoded column
+display(df.head())
+
+# This line prints a concise summary of the DataFrame.
+# It includes the index dtype and columns, non-null values and their types,
+# and memory usage. This is useful for a quick overview of the data structure.
+df.info()
+
+
