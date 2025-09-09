@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 !pip install streamlit
 %%writefile app.py
 import streamlit as st
