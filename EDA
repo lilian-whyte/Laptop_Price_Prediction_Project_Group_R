@@ -1,0 +1,82 @@
+Exploratory Data Analysis (EDA)
+numerical_cols = ['Inches', 'Ram', 'Weight', 'Price_euros', 'Memory_Value'] # Define a list of numerical column names to visualize
+
+plt.figure(figsize=(15, 10)) # Create a figure for the plots with a specified size
+
+for i, col in enumerate(numerical_cols): # Iterate through each numerical column with its index
+    # Histogram subplot
+    plt.subplot(len(numerical_cols), 2, 2 * i + 1) # Create a subplot for the histogram in a grid layout
+    sns.histplot(data=df, x=col, kde=True) # Generate a histogram with a kernel density estimate (KDE) overlay
+    plt.title(f'Histogram of {col}') # Set the title of the histogram subplot
+
+    # Box plot subplot
+    plt.subplot(len(numerical_cols), 2, 2 * i + 2) # Create a subplot for the box plot in the same grid layout
+    sns.boxplot(data=df, y=col) # Generate a box plot
+    plt.title(f'Box Plot of {col}') # Set the title of the box plot subplot
+
+plt.tight_layout() # Adjust subplot parameters for a tight layout
+plt.show() # Display the generated plots
+
+numerical_features = ['Inches', 'Ram', 'Weight', 'Memory_Value'] # List of numerical features for scatter plots
+
+plt.figure(figsize=(15, 10)) # Create a figure for the scatter plots with a specified size
+
+for i, col in enumerate(numerical_features): # Iterate through each numerical feature with its index
+    plt.subplot(2, 2, i + 1) # Create a subplot for the current scatter plot in a 2x2 grid layout
+    sns.scatterplot(data=df, x=col, y='Price_euros') # Generate a scatter plot with the feature on the x-axis and 'Price_euros' on the y-axis
+    plt.title(f'Price vs. {col}') # Set the title of the scatter plot subplot
+    plt.xlabel(col) # Set the label for the x-axis
+    plt.ylabel('Price (euros)') # Set the label for the y-axis
+
+plt.tight_layout() # Adjust subplot parameters for a tight layout
+plt.show() # Display the generated plots
+
+# Select numerical columns
+numerical_cols = df.select_dtypes(include=np.number).columns
+
+# Calculate the correlation matrix
+correlation_matrix = df[numerical_cols].corr()
+
+# Create a heatmap of the correlation matrix
+plt.figure(figsize=(12, 8))
+sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt=".2f")
+plt.title('Correlation Matrix of Numerical Features')
+plt.show()
+
+categorical_cols = ['Company_Encoded', 'TypeName_Encoded', 'Screen_Dimensions', 'Screen_Type_Encoded',
+                    'CPU_Brand_Encoded', 'Processing_Level_Encoded', 'CPU_Details_Encoded',
+                    'Memory_Type_Encoded', 'GPU_Company_Encoded', 'GPU_Type_Encoded', 'OpSys_Encoded'] # Define a list of encoded categorical column names for plotting
+
+plt.figure(figsize=(18, 12)) # Create a figure for the plots with a specified size
+
+for i, col in enumerate(categorical_cols): # Iterate through each categorical column with its index
+    plt.subplot(4, 3, i + 1) # Create a subplot for the current count plot in a 4x3 grid layout
+    sns.countplot(data=df, y=col, order=df[col].value_counts().index) # Generate a count plot, ordering the bars by the frequency of each category
+    plt.title(f'Distribution of {col}') # Set the title of the count plot subplot
+    plt.xlabel('Count') # Set the label for the x-axis (representing the count of each category)
+    plt.ylabel(col) # Set the label for the y-axis (representing the categorical feature)
+
+plt.tight_layout() # Adjust subplot parameters for a tight layout
+plt.show() # Display the generated plots
+
+plt.figure(figsize=(18, 12))
+
+for i, col in enumerate(categorical_cols):
+    plt.subplot(4, 3, i + 1)
+    sns.boxplot(data=df, x='Price_euros', y=col)
+    plt.title(f'Price vs. {col}')
+    plt.xlabel('Price (euros)')
+    plt.ylabel(col)
+
+plt.tight_layout()
+plt.show()
+
+# Analyze the correlation matrix to identify numerical features with strong correlation to Price_euros
+# Based on the heatmap, 'Ram', 'Memory_Type_Encoded', 'Processing_Level_Encoded', 'CPU_Details_Encoded' and 'GPU_Company_Encoded' show notable correlations.
+
+# Review the box plots of encoded categorical features against Price_euros
+# The box plots for 'Company_Encoded', 'TypeName_Encoded', 'Screen_Dimensions', 'Screen_Type_Encoded',
+# 'CPU_Brand_Encoded', 'Processing_Level_Encoded', 'CPU_Details_Encoded', 'Memory_Type_Encoded',
+# 'GPU_Company_Encoded', 'GPU_Type_Encoded', and 'OpSys_Encoded' show varying distributions of price across categories,
+# suggesting they are relevant features.
+
