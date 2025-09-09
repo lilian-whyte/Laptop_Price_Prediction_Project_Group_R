@@ -226,7 +226,7 @@ def extract_cpu_details(cpu_string):
     if len(parts) > 2:
         return ' '.join(parts[2:])
     elif len(parts) > 1:
-        return ' '.join(parts[1:])
+        return ' '.join(parts[1:]) 
     return ''
 
 def extract_memory_value(memory_str):
