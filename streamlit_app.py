@@ -5,8 +5,11 @@ import pickle
 import re
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
+from sklearn.ensemble import RandomForestRegressor
 
-# Include CSS for improved styling
+# --- Set up the Streamlit page and styling ---
+st.set_page_config(layout="wide")
+st.title("Laptop Price Prediction")
 st.markdown("""
 <style>
 body {
@@ -18,108 +21,37 @@ body {
     background-color: #4B0082; /* Ensure the main app container also has indigo background */
     color: #F0F2F6; /* Light text color */
 }
-.st-cy { /* Style for input labels */
-    color: #E6E6FA; /* Lighter indigo for labels */
+.st-cy, .st-d1, .st-ch { /* Unify styling for input labels, number input, and selectbox */
+    color: #E6E6FA; /* Lighter indigo for labels and text */
 }
-.st-d1 { /* Style for number input */
+.st-d1, .st-ch {
     background-color: #6A5ACD; /* Slate blue background for input fields */
-    color: #F0F2F6; /* Light text color for input fields */
     border-radius: 5px;
     padding: 10px;
 }
-.st-ch { /* Style for selectbox */
-    background-color: #6A5ACD; /* Slate blue background for selectbox */
-    color: #F0F2F6; /* Light text color for selectbox */
-    border-radius: 5px;
-    padding: 10px;
-}
-.stButton > button { /* Style for the button */
+.stButton > button {
     background-color: #8A2BE2; /* Blueviolet button background */
     color: white;
     border-radius: 5px;
     padding: 10px 20px;
     font-size: 16px;
+    border: none;
 }
-.stButton > button:hover { /* Style for the button on hover */
+.stButton > button:hover {
     background-color: #9370DB; /* Mediumpurple on hover */
-    color: white;
 }
-h1, h2, h3, h4, h5, h6 { /* Style for headers */
+h1, h2, h3, h4, h5, h6 {
     color: #E6E6FA; /* Lighter indigo for headers */
 }
 </style>
 """, unsafe_allow_html=True)
 
+# --- Define the paths for the model and preprocessor files ---
+MODEL_PATH = 'laptop_price_model.pkl'
+PREPROCESSOR_PATH = 'laptop_preprocessor.pkl'
 
-import pandas as pd
-import streamlit as st
-
-# ... other imports and code
-
-st.title("Laptop Price Prediction")
-
-# This is the original sharing link you get from Google Drive
-share_link = "https://drive.google.com/file/d/1POVnnp6fBP97E-bCev1s-BnPqMENGzv8/view?usp=drive_link"
-
-# Extract the file ID from the sharing link
-try:
-    file_id = share_link.split('/')[-2]
-    url = f"https://drive.google.com/uc?export=download&id={file_id}"
-except IndexError:
-    st.error("Invalid Google Drive sharing link format.")
-    st.stop()
-
-# Read the CSV file from the constructed URL
-try:
-    df_original = pd.read_csv(url, encoding='latin-1')
-    st.success("CSV file loaded successfully!")
-    st.dataframe(df_original.head()) # Optional: show the first few rows
-except Exception as e:
-    st.error(f"Error loading CSV from Google Drive: {e}")
-    st.info("Please ensure the Google Drive file is publicly shared.")
-    st.stop()
-
-# ... the rest of your app logic
-
-
-# Set the title of the web application
-st.title('Laptop Price Prediction')
-
-# Add a welcoming message
-st.write('Enter the details of the laptop to predict its price.')
-
-# Add input fields for the features
-st.header('Enter Laptop Features')
-
-# Define the selected features used for training (using original names for user input)
-selected_features_user = [
-    'Inches',
-    'Ram',
-    'Weight',
-    'Company',
-    'TypeName',
-    'Screen_Type',
-    'CPU_Brand',
-    'Processing_Level',
-    'CPU_Details',
-    'Memory_Value',
-    'Memory_Type',
-    'GPU_Company',
-    'GPU_Type',
-    'OpSys'
-]
-
-# --- Feature Engineering Functions (Copied from Notebook) ---
-
-def extract_dimensions(resolution_str):
-    """Extracts screen dimensions from a resolution string."""
-    match = re.search(r'(\d+x\d+)', resolution_str)
-    if match:
-        return match.group(1)
-    return None
-
+# --- Utility functions for feature engineering ---
 def extract_screen_type(resolution_str):
-    """Extracts screen types from a resolution string."""
     types = []
     if 'IPS Panel' in resolution_str:
         types.append('IPS Panel')
@@ -132,12 +64,9 @@ def extract_screen_type(resolution_str):
     return ', '.join(types) if types else 'Other'
 
 def extract_cpu_brand(cpu_string):
-    """Extracts the CPU brand (first word) from a CPU string."""
     return cpu_string.split()[0]
 
 def extract_processing_level(cpu_string):
-    """Extracts the processing level from a CPU string."""
-    # Look for patterns like 'Core i3', 'Core i5', 'Core i7', 'Celeron', 'Pentium', 'AMD'
     patterns = [r'Core i[357]', r'Celeron', r'Pentium', r'AMD']
     for pattern in patterns:
         match = re.search(pattern, cpu_string)
@@ -146,10 +75,7 @@ def extract_processing_level(cpu_string):
     return 'Other'
 
 def extract_cpu_details(cpu_string):
-    """Extracts CPU details (clock speed, model number) excluding brand and processing level."""
-    # Remove brand and processing level (assuming they are the first words)
     parts = cpu_string.split()
-    # Join the remaining parts, skipping the brand and processing level
     if len(parts) > 2:
         return ' '.join(parts[2:])
     elif len(parts) > 1:
@@ -157,18 +83,16 @@ def extract_cpu_details(cpu_string):
     return ''
 
 def extract_memory_value(memory_str):
-    """Extracts the numerical memory value from a memory string."""
     match = re.search(r'(\d+)(GB|TB)', memory_str)
     if match:
         value = int(match.group(1))
         unit = match.group(2)
         if unit == 'TB':
-            value *= 1024  # Convert TB to GB
+            value *= 1024
         return value
-    return 0  # Return 0 for unhandled cases or missing values
+    return 0
 
 def extract_memory_type(memory_str):
-    """Extracts the memory type from a memory string."""
     types = []
     if 'SSD' in memory_str:
         types.append('SSD')
@@ -181,124 +105,125 @@ def extract_memory_type(memory_str):
     return ', '.join(types) if types else 'Other'
 
 def extract_gpu_company(gpu_string):
-    """Extracts the GPU company (first word) from a GPU string."""
     return gpu_string.split()[0]
 
 def extract_gpu_type(gpu_string):
-    """Extracts the GPU type (parts after the first word) from a GPU string."""
     parts = gpu_string.split()
     if len(parts) > 1:
         return ' '.join(parts[1:])
     return ''
 
-def extract_gpu_details(gpu_string):
-    """Extracts the numerical or specific model details following the type from a GPU string."""
-    parts = gpu_string.split()
-    # Check if there are more than two parts (company and type)
-    if len(parts) > 2:
-        # Join the parts from the third part onwards
-        return ' '.join(parts[2:])
-    # If there are two or fewer parts, there are no further details to extract
-    return ''
+# --- Load the model and preprocessor from disk ---
+# This is a key change. We load the objects once at the start.
+@st.cache_data
+def load_assets():
+    try:
+        # Load the trained model
+        with open(MODEL_PATH, 'rb') as file:
+            model = pickle.load(file)
 
+        # Load the preprocessor (label encoders and feature lists)
+        with open(PREPROCESSOR_PATH, 'rb') as file:
+            preprocessor = pickle.load(file)
+            label_encoders = preprocessor['label_encoders']
+            categorical_options = preprocessor['categorical_options']
+            numerical_ranges = preprocessor['numerical_ranges']
+            selected_features_encoded = preprocessor['selected_features_encoded']
 
-# --- Apply Feature Engineering and Encoding to Original Data for Mappings ---
+        return model, label_encoders, categorical_options, numerical_ranges, selected_features_encoded
+    except FileNotFoundError:
+        st.error(f"Required files not found. Please ensure both '{MODEL_PATH}' and '{PREPROCESSOR_PATH}' are in the same directory as this script.")
+        st.stop()
+    except Exception as e:
+        st.error(f"An error occurred while loading model assets: {e}")
+        st.stop()
 
-# Create temporary columns for feature extraction to get unique values for selectboxes
-df_original['Screen_Dimensions'] = df_original['ScreenResolution'].apply(extract_dimensions)
-df_original['Screen_Type'] = df_original['ScreenResolution'].apply(extract_screen_type)
-df_original['CPU_Brand'] = df_original['Cpu'].apply(extract_cpu_brand)
-df_original['Processing_Level'] = df_original['Cpu'].apply(extract_processing_level)
-df_original['CPU_Details'] = df_original['Cpu'].apply(extract_cpu_details)
-df_original['Memory_Value'] = df_original['Memory'].apply(extract_memory_value)
-df_original['Memory_Type'] = df_original['Memory'].apply(extract_memory_type)
-df_original['GPU_Company'] = df_original['Gpu'].apply(extract_gpu_company)
-df_original['GPU_Type'] = df_original['Gpu'].apply(extract_gpu_type)
-df_original['GPU_Details'] = df_original['Gpu'].apply(extract_gpu_details)
+model, label_encoders, categorical_options, numerical_ranges, selected_features_encoded = load_assets()
 
-# Convert 'Weight' and 'Ram' to numeric types
-df_original['Weight'] = df_original['Weight'].str.replace('kg', '').astype(float)
-df_original['Ram'] = df_original['Ram'].str.replace('GB', '').astype(int)
+# --- Streamlit UI for user input ---
+st.write('Enter the details of the laptop to predict its price.')
+st.header('Enter Laptop Features')
 
+# Input fields for numerical features
+cols_numerical = st.columns(3)
+with cols_numerical[0]:
+    inches = st.number_input('Inches:', min_value=numerical_ranges['Inches']['min'], max_value=numerical_ranges['Inches']['max'], value=numerical_ranges['Inches']['mean'], step=0.1)
+with cols_numerical[1]:
+    ram = st.number_input('Ram (GB):', min_value=numerical_ranges['Ram']['min'], max_value=numerical_ranges['Ram']['max'], value=numerical_ranges['Ram']['mean'], step=1.0)
+with cols_numerical[2]:
+    weight = st.number_input('Weight (kg):', min_value=numerical_ranges['Weight']['min'], max_value=numerical_ranges['Weight']['max'], value=numerical_ranges['Weight']['mean'], step=0.01)
+memory_value = st.number_input('Memory Value (GB):', min_value=numerical_ranges['Memory_Value']['min'], max_value=numerical_ranges['Memory_Value']['max'], value=numerical_ranges['Memory_Value']['mean'], step=1.0)
 
-# Create LabelEncoders and fit them on the original data for consistent encoding
-label_encoders = {}
-categorical_cols = ['Company', 'TypeName', 'Screen_Type', 'CPU_Brand', 'Processing_Level', 'CPU_Details', 'Memory_Type', 'GPU_Company', 'GPU_Type', 'OpSys']
-for col in categorical_cols:
-    label_encoders[col] = LabelEncoder()
-    label_encoders[col].fit(df_original[col])
+st.markdown("---")
 
-# Load the trained model
-import pickle
-from sklearn.ensemble import RandomForestRegressor
-# Assuming 'model' is your trained RandomForestRegressor object
-# This code will create a file named 'model.pkl' in the current directory
-with open('model.pkl', 'wb') as file:
-    pickle.dump(model, file)
-with open('models.pkl', 'rb') as f:
-    model = pickle.load(f)
-# --- Streamlit UI ---
+# Input fields for categorical features
+cols_cat1 = st.columns(3)
+with cols_cat1[0]:
+    company = st.selectbox('Company:', options=categorical_options['Company'])
+with cols_cat1[1]:
+    typename = st.selectbox('TypeName:', options=categorical_options['TypeName'])
+with cols_cat1[2]:
+    opsys = st.selectbox('OpSys:', options=categorical_options['OpSys'])
 
-# Input fields based on selected_features_user
-input_data = {}
+cols_cat2 = st.columns(3)
+with cols_cat2[0]:
+    screen_type = st.selectbox('Screen Type:', options=categorical_options['Screen_Type'])
+with cols_cat2[1]:
+    cpu_brand = st.selectbox('CPU Brand:', options=categorical_options['CPU_Brand'])
+with cols_cat2[2]:
+    processing_level = st.selectbox('Processing Level:', options=categorical_options['Processing_Level'])
 
-for feature in selected_features_user:
-    if feature in ['Inches', 'Ram', 'Weight', 'Memory_Value']:
-        # Numerical input
-        min_val = float(df_original[feature].min())
-        max_val = float(df_original[feature].max())
-        mean_val = float(df_original[feature].mean())
-        input_data[feature] = st.number_input(f'{feature}:', min_value=min_val, max_value=max_val, value=mean_val, step=0.1)
-    elif feature in ['Company', 'TypeName', 'Screen_Type', 'CPU_Brand', 'Processing_Level', 'CPU_Details', 'Memory_Type', 'GPU_Company', 'GPU_Type', 'OpSys']:
-        # Categorical input using selectbox
-        options = df_original[feature].unique().tolist()
-        options.sort() # Sort options for better user experience
-        input_data[feature] = st.selectbox(f'{feature}:', options)
+cols_cat3 = st.columns(3)
+with cols_cat3[0]:
+    cpu_details = st.selectbox('CPU Details:', options=categorical_options['CPU_Details'])
+with cols_cat3[1]:
+    memory_type = st.selectbox('Memory Type:', options=categorical_options['Memory_Type'])
+with cols_cat3[2]:
+    gpu_company = st.selectbox('GPU Company:', options=categorical_options['GPU_Company'])
 
+gpu_type = st.selectbox('GPU Type:', options=categorical_options['GPU_Type'])
 
-# Add a button to trigger prediction
+st.markdown("---")
+
+# Prediction button
 if st.button('Predict Price'):
-    # --- Prediction Logic ---
+    try:
+        # Create a dictionary for the user input
+        user_input = {
+            'Inches': inches,
+            'Ram': ram,
+            'Weight': weight,
+            'Memory_Value': memory_value,
+            'Company': company,
+            'TypeName': typename,
+            'OpSys': opsys,
+            'Screen_Type': screen_type,
+            'CPU_Brand': cpu_brand,
+            'Processing_Level': processing_level,
+            'CPU_Details': cpu_details,
+            'Memory_Type': memory_type,
+            'GPU_Company': gpu_company,
+            'GPU_Type': gpu_type
+        }
 
-    # Process input data into a DataFrame
-    input_df = pd.DataFrame([input_data])
+        # Create a DataFrame from the input
+        input_df = pd.DataFrame([user_input])
 
-    # Apply the same feature engineering and encoding steps to the input data
-    # based on the user's selections in the selectboxes.
+        # Apply encoding using the loaded label_encoders
+        for col, le in label_encoders.items():
+            input_df[col + '_Encoded'] = le.transform(input_df[col])
 
-    # Encoding categorical features
-    for col in categorical_cols:
-        # Use the fitted label encoders
-        input_df[col + '_Encoded'] = label_encoders[col].transform(input_df[col])
+        # Select the features in the correct order for the model
+        input_for_prediction = input_df[selected_features_encoded]
 
-    # Select the features in the order used during training
-    # Ensure the column names match the training data (encoded names for categorical)
-    selected_features_encoded = [
-        'Inches',
-        'Ram',
-        'Weight',
-        'Company_Encoded',
-        'TypeName_Encoded',
-        'Screen_Type_Encoded',
-        'CPU_Brand_Encoded',
-        'Processing_Level_Encoded',
-        'CPU_Details_Encoded',
-        'Memory_Value',
-        'Memory_Type_Encoded',
-        'GPU_Company_Encoded',
-        'GPU_Type_Encoded',
-        'OpSys_Encoded'
-    ]
+        # Make prediction
+        predicted_price = model.predict(input_for_prediction)
 
-    # Create the final input array for prediction
-    # We only need the encoded categorical features and the numerical features
-    input_for_prediction = input_df[selected_features_encoded]
+        # Display the result
+        st.success(f'Predicted Price: €{np.exp(predicted_price[0]):,.2f}') # Use np.exp since the model likely predicted log price
+        st.balloons()
 
-    # Make prediction
-    predicted_price = model.predict(input_for_prediction)
-
-    # Display the predicted price
-    st.subheader(f'Predicted Price: €{predicted_price[0]:.2f}')
-
-
-
+    except ValueError as ve:
+        st.error(f"Input error: {ve}. Please check your selections.")
+    except Exception as e:
+        st.error(f"An unexpected error occurred: {e}")
