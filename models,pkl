@@ -1,0 +1,6 @@
+import pickle
+from sklearn.ensemble import RandomForestRegressor
+# Assuming 'model' is your trained RandomForestRegressor object
+# This code will create a file named 'model.pkl' in the current directory
+with open('model.pkl', 'wb') as file:
+    pickle.dump(model, file)
