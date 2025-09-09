@@ -272,29 +272,3 @@ if st.button('Predict Price'):
 
 !pip install -q streamlit
 
-## Laptop Price Prediction Project Summary
-
-This project aimed to predict the price of laptops based on their features. We used a dataset containing information about various laptops, including details like their brand, type, screen size, processor, memory, and more.
-
-**What we did:**
-
-1.  **Explored the data (EDA):** We looked at the data to understand what kind of information we had and how the different features related to each other and to the price of laptops.
-    *   We checked for any missing information and found none.
-    *   We looked at the distribution of numerical features like screen size, weight, and price using plots. This helped us see the typical range of these values and identify any unusual or extreme values (outliers).
-    *   We examined how numerical features like RAM and memory size relate to price. Generally, more RAM and larger memory tend to be associated with higher prices.
-    *   We also looked at how different categories, like the company, type of laptop (e.g., Notebook, Ultrabook), and operating system, influence the price. Some brands or types of laptops are generally more expensive than others.
-
-2.  **Prepared the data:** Before building a prediction model, we needed to prepare the data. This involved converting text-based information into numbers that the model could understand. For example, we converted the 'Company' names into numerical codes.
-
-3.  **Built a prediction model:** We used a method called "Random Forest Regressor" to build a model that can learn the relationship between the laptop features and its price. Think of this as teaching a computer to estimate the price based on the patterns it saw in the data.
-
-4.  **Evaluated the model:** After training the model, we tested it on a separate set of laptops it hadn't seen before to see how well it could predict their prices.
-    *   **Mean Absolute Error (MAE):** This tells us, on average, how far off our predictions were from the actual prices. An MAE of approximately €182.63 means that, on average, our predicted prices were about €182.63 away from the real prices.
-    *   **Root Mean Squared Error (RMSE):** This is similar to MAE but gives more weight to larger errors. An RMSE of approximately €294.98 indicates the typical magnitude of the prediction errors.
-    *   **R-squared (R2):** This value tells us how much of the variation in laptop prices our model can explain. An R2 of approximately 0.84 means that about 84% of the differences in laptop prices can be explained by the features we used in our model. A higher R2 indicates a better fit.
-
-**In simple terms:**
-
-Our model can predict laptop prices with a reasonable degree of accuracy. On average, our predictions are within about €182.63 of the actual price. The model is able to explain about 84% of why some laptops are priced differently than others based on their characteristics.
-
-This means the model can be a helpful tool for estimating the price of a new laptop based on its specifications.
