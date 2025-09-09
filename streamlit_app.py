@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-!pip install streamlit
 %%writefile app.py
 import streamlit as st
 import pandas as pd
@@ -270,5 +269,5 @@ if st.button('Predict Price'):
     # Display the predicted price
     st.subheader(f'Predicted Price: €{predicted_price[0]:.2f}')
 
-!pip install -q streamlit
+
 
