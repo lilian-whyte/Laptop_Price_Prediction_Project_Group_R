@@ -52,8 +52,15 @@ h1, h2, h3, h4, h5, h6 { /* Style for headers */
 
 
 # Load the dataframe (assuming the cleaned dataframe is needed for feature extraction)
-df_original = pd.read_csv("/content/drive/MyDrive/CPE221LABS/laptop_price.csv", encoding='latin-1')
+import pandas as pd
 
+# Replace 'YOUR_FILE_ID' with the actual ID from your Google Drive sharing link
+file_id = '1POVnnp6fBP97E-bCev1s-BnPqMENGzv8' 
+url = f'https://drive.google.com/file/d/1POVnnp6fBP97E-bCev1s-BnPqMENGzv8/view?usp=drive_link'
+
+df_original = pd.read_csv(url, encoding='latin-1')
+
+https://drive.google.com/file/d/1POVnnp6fBP97E-bCev1s-BnPqMENGzv8/view?usp=drive_link
 # Set the title of the web application
 st.title('Laptop Price Prediction')
 
