@@ -1,0 +1,64 @@
+df.isnull().values.any()
+df.isnull().values.any()
+
+# Check for missing values in each column
+df.isnull().sum()
+
+# Visualize potential outliers using violin plots
+numerical_cols = ['Inches', 'Weight', 'Price_euros']
+
+plt.figure(figsize=(15, 5))
+for i, col in enumerate(numerical_cols):
+    plt.subplot(1, 3, i + 1)
+    # Create a violin plot with the column values on the y-axis
+    sns.violinplot(y=df[col])
+    plt.title(f'Violin Plot of {col}')
+    plt.ylabel(col) # Add y-axis label for clarity
+    plt.xlabel('') # Remove x-axis label as it's not needed
+plt.tight_layout()
+plt.show()
+
+### Violin Plot Explanation
+
+The violin plots visualize the distribution of the numerical columns 'Inches', 'Weight', and 'Price_euros'.
+
+- The **width** of the violin at any given point represents the density of data points at that value. A wider section indicates a higher concentration of data.
+- The **white dot** inside the violin represents the median of the data.
+- The **thick black bar** in the center shows the interquartile range (IQR), which is the range between the 25th and 75th percentiles.
+- The **thin black line** extending from the bar represents the rest of the distribution, excluding outliers.
+
+These plots are useful for seeing the shape of the distribution, identifying potential modes (peaks), and getting a sense of the spread and potential outliers in the data.
+
+from scipy.stats import zscore
+
+# Select numerical columns for outlier removal
+numerical_cols = ['Inches', 'Weight', 'Price_euros']
+
+# Convert 'Weight' to numeric before outlier removal
+df['Weight'] = df['Weight'].str.replace('kg', '').astype(float)
+
+
+# Calculate the Z-scores for the numerical columns
+z_scores = df[numerical_cols].apply(zscore)
+
+# Define a threshold for Z-score (commonly 3)
+threshold = 3
+
+# Create a boolean mask to identify rows with Z-scores above the threshold in any of the selected columns
+outlier_mask = (z_scores.abs() > threshold).any(axis=1)
+
+# Filter the DataFrame to remove rows identified as outliers
+df_cleaned_zscore = df[~outlier_mask].copy()
+
+print(f"Original shape: {df.shape}")
+print(f"Shape after removing outliers using Z-score: {df_cleaned_zscore.shape}")
+
+# Display the first few rows of the cleaned DataFrame
+display(df_cleaned_zscore.head())
+
+### Justification for using Violin Plots
+
+Violin plots were chosen to visualize the distribution of the numerical columns because they provide a richer representation compared to box plots. While box plots only show the median, quartiles, and potential outliers, violin plots display the entire probability density of the data. This allows for a better understanding of the data's shape, including whether it is unimodal or multimodal, and helps in identifying potential outliers within the context of the overall distribution.
+
+df.info()
+
