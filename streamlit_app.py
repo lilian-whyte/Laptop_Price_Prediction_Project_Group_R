@@ -148,7 +148,7 @@ print("Model and preprocessor files have been created successfully.")
 #!/usr/bin/env python
 import streamlit as st
 import pandas as pd
-import pickle
+import pickle 
 import re
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
