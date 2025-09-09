@@ -1,0 +1,12 @@
+# Importing all the necessary libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import sklearn as sk
+# Loading the dataset into the notebook and reading it. Displaying the first five rows of the dataset.
+df = pd.read_csv("/content/drive/MyDrive/CPE221LABS/laptop_price.csv", encoding='latin-1')
+
+df.head()
+df.info()
+df.describe()
