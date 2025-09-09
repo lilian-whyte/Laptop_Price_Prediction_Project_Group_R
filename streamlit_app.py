@@ -52,7 +52,7 @@ h1, h2, h3, h4, h5, h6 { /* Style for headers */
 
 
 # Load the trained model
-with open('model.pkl', 'rb') as f:
+with open('models/model.pkl', 'rb') as f:
     model = pickle.load(f)
 
 # Load the dataframe (assuming the cleaned dataframe is needed for feature extraction)
