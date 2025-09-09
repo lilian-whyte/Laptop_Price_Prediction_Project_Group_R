@@ -51,16 +51,6 @@ h1, h2, h3, h4, h5, h6 { /* Style for headers */
 """, unsafe_allow_html=True)
 
 
-# Load the trained model
-import pickle
-from sklearn.ensemble import RandomForestRegressor
-# Assuming 'model' is your trained RandomForestRegressor object
-# This code will create a file named 'model.pkl' in the current directory
-with open('model.pkl', 'wb') as file:
-    pickle.dump(model, file)
-with open('models.pkl', 'rb') as f:
-    model = pickle.load(f)
-
 # Load the dataframe (assuming the cleaned dataframe is needed for feature extraction)
 df_original = pd.read_csv("/content/drive/MyDrive/CPE221LABS/laptop_price.csv", encoding='latin-1')
 
@@ -210,7 +200,15 @@ for col in categorical_cols:
     label_encoders[col] = LabelEncoder()
     label_encoders[col].fit(df_original[col])
 
-
+# Load the trained model
+import pickle
+from sklearn.ensemble import RandomForestRegressor
+# Assuming 'model' is your trained RandomForestRegressor object
+# This code will create a file named 'model.pkl' in the current directory
+with open('model.pkl', 'wb') as file:
+    pickle.dump(model, file)
+with open('models.pkl', 'rb') as f:
+    model = pickle.load(f)
 # --- Streamlit UI ---
 
 # Input fields based on selected_features_user
