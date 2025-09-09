@@ -51,14 +51,36 @@ h1, h2, h3, h4, h5, h6 { /* Style for headers */
 """, unsafe_allow_html=True)
 
 
-# Load the dataframe (assuming the cleaned dataframe is needed for feature extraction)
 import pandas as pd
+import streamlit as st
 
-# Replace 'YOUR_FILE_ID' with the actual ID from your Google Drive sharing link
-file_id = '1POVnnp6fBP97E-bCev1s-BnPqMENGzv8' 
-url = f'https://drive.google.com/file/d/1POVnnp6fBP97E-bCev1s-BnPqMENGzv8/view?usp=drive_link'
+# ... other imports and code
 
-df_original = pd.read_csv(url, encoding='latin-1')
+st.title("Laptop Price Prediction")
+
+# This is the original sharing link you get from Google Drive
+share_link = "https://drive.google.com/file/d/1POVnnp6fBP97E-bCev1s-BnPqMENGzv8/view?usp=drive_link"
+
+# Extract the file ID from the sharing link
+try:
+    file_id = share_link.split('/')[-2]
+    url = f"https://drive.google.com/uc?export=download&id={file_id}"
+except IndexError:
+    st.error("Invalid Google Drive sharing link format.")
+    st.stop()
+
+# Read the CSV file from the constructed URL
+try:
+    df_original = pd.read_csv(url, encoding='latin-1')
+    st.success("CSV file loaded successfully!")
+    st.dataframe(df_original.head()) # Optional: show the first few rows
+except Exception as e:
+    st.error(f"Error loading CSV from Google Drive: {e}")
+    st.info("Please ensure the Google Drive file is publicly shared.")
+    st.stop()
+
+# ... the rest of your app logic
+
 
 # Set the title of the web application
 st.title('Laptop Price Prediction')
